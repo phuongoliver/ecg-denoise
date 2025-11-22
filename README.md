@@ -39,7 +39,7 @@ Do dữ liệu ECG khá nặng, chúng ta sẽ **không push data lên GitHub**.
 
 **1. Clone Code:**
 ```bash
-git clone [https://github.com/phuongoliver/ecg-denoise.git](https://github.com/phuongoliver/ecg-denoise.git)
+git clone https://github.com/phuongoliver/ecg-denoise.git
 cd ecg-denoise
 ```
 **2. Tải Dữ liệu:**
