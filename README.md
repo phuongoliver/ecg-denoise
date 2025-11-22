@@ -26,3 +26,19 @@ Our model achieves a balance between high accuracy and computational efficiency 
 | **Denoising Performance** | **+15.6 dB** | Improvement in SNR (Signal-to-Noise Ratio) compared to standard filters. |
 | **Model Size** | **0.15 Million** | Extremely low parameter count. |
 | **Inference Speed** | **~22 ms** | Running on Raspberry Pi 3 (Real-time capable). |
+
+---
+
+## 📄 HƯỚNG DẪN THỰC HIỆN MINI-PROJECT DATA MINING
+**Topic:** Efficient CNN-SWT-Transformer for Fog-Based ECG Denoising
+**Định hướng:** Type 1 (Propose Improvement to Existing Techniques)
+
+Chào mọi người, để hoàn thiện bài Mini-project với mục tiêu đạt điểm tối đa ở các mục **Evaluation** và **Comparison**, mình (Phương) đã setup xong khung sườn dự án. Dưới đây là hướng dẫn cài đặt và phân chia nhiệm vụ cụ thể cho A và B.
+
+### 🛠 PHẦN 1: CÀI ĐẶT MÔI TRƯỜNG (Làm đầu tiên)
+Do dữ liệu ECG khá nặng, chúng ta sẽ **không push data lên GitHub**. Quy trình setup như sau:
+
+**1. Clone Code:**
+```bash
+git clone [https://github.com/phuongoliver/ecg-denoise.git](https://github.com/phuongoliver/ecg-denoise.git)
+cd ecg-denoise
