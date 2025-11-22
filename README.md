@@ -31,9 +31,8 @@ Our model achieves a balance between high accuracy and computational efficiency 
 
 ## 📄 HƯỚNG DẪN THỰC HIỆN MINI-PROJECT DATA MINING
 **Topic:** Efficient CNN-SWT-Transformer for Fog-Based ECG Denoising
-**Định hướng:** Type 1 (Propose Improvement to Existing Techniques)
 
-Chào mọi người, để hoàn thiện bài Mini-project với mục tiêu đạt điểm tối đa ở các mục **Evaluation** và **Comparison**, mình (Phương) đã setup xong khung sườn dự án. Dưới đây là hướng dẫn cài đặt và phân chia nhiệm vụ cụ thể cho A và B.
+Chào mọi người, để hoàn thiện bài Mini-project, mình đã setup xong khung sườn dự án. Dưới đây là hướng dẫn cài đặt và phân chia nhiệm vụ cụ thể cho A và B. Các bạn tự chọn A hoặc B nha.
 
 ### 🛠 PHẦN 1: CÀI ĐẶT MÔI TRƯỜNG (Làm đầu tiên)
 Do dữ liệu ECG khá nặng, chúng ta sẽ **không push data lên GitHub**. Quy trình setup như sau:
@@ -42,3 +41,95 @@ Do dữ liệu ECG khá nặng, chúng ta sẽ **không push data lên GitHub**.
 ```bash
 git clone [https://github.com/phuongoliver/ecg-denoise.git](https://github.com/phuongoliver/ecg-denoise.git)
 cd ecg-denoise
+```
+**2. Tải Dữ liệu:**
+
+Vào link Google Drive này: [CHÈN LINK DRIVE CỦA BẠN VÀO ĐÂY]
+
+Tải file data.zip và giải nén.
+
+**Quan trọng:** Copy thư mục data vừa giải nén vào thư mục gốc của dự án (ngang hàng với scripts, models).
+
+**3. Cài thư viện:**
+
+Bash
+
+# Tạo virtual environment
+```bash
+python -m venv .venv
+```
+# Windows:
+```bash
+.venv\Scripts\activate
+```
+# Mac/Linux:
+```bash
+source .venv/bin/activate
+```
+# Cài đặt dependencies
+```bash
+pip install -r requirements.txt
+```
+
+**4. Test:** Chạy thử python scripts/00_EDA.py. Nếu hiện biểu đồ ECG là thành công.
+
+### 👤 PHẦN 2: NHIỆM VỤ CỤ THỂ
+
+**👉 Nhiệm vụ cho A: Baseline Comparison (So sánh)**
+Mục tiêu: "Compared with other methods" + "Discuss advantages"
+
+Nội dung: Bạn cần chạy 2 phương pháp lọc nhiễu khác để so sánh với model của mình proposed.
+
+Phương pháp 1: Wavelet Transform (Truyền thống)
+
+Sử dụng thư viện PyWavelets (đã có trong requirements).
+
+Viết script dùng hàm pywt.threshold để lọc nhiễu trên tập test set giống như model chính đang dùng.
+
+Lưu ý: Tham khảo các phương pháp truyền thống thường hạn chế trong việc loại bỏ đa dạng các loại nhiễu.
+
+Phương pháp 2: Simple CNN Autoencoder (Deep Learning cơ bản)
+
+Dựng một model CNN 1D đơn giản (không có SWT, không có Transformer).
+
+Train nhanh trên data hiện có (khoảng 5-10 epochs). Model của mình là train trên 10 epochs.
+
+**Output yêu cầu:**
+
+Một bảng so sánh 3 cột: Metric (SNR, MSE, Parameters, Inferenced Time) | Wavelet | Simple CNN | Ours.
+
+Nhận xét: Tại sao model của nhóm mình (kết hợp SWT + Transformer) lại tốt hơn CNN thường?
+Mở rộng: Nếu có thời gian thì có thể chạy một model DL khác nặng nhưng có kết quả có thể tốt hơn.
+
+**👉 Nhiệm vụ cho bạn B: Ablation Study & Validation**
+Mục tiêu: "Evaluate with relevant data"  + "Improvement direction"
+
+Nội dung: Chứng minh độ hiệu quả và tính bền vững của kiến trúc model.
+
+Ablation Study (Nghiên cứu loại bỏ):
+
+Thử bỏ module Transformer hoặc SWT ra khỏi kiến trúc code hiện tại.
+
+Train lại và xem chỉ số SNR giảm bao nhiêu.
+
+Ý nghĩa: Chứng minh rằng các module này là cần thiết, không thể bỏ đi.
+
+Robustness Test (Kiểm thử độ bền):
+
+Sử dụng model chính (Ours), chạy test trên một mức nhiễu khác như -5dB (ví dụ: nhiễu cực đại hoặc nhiễu cực tiểu).
+
+Hoặc: Lấy 1 file ECG bất kỳ từ bộ dữ liệu khác (như QT Database trên PhysioNet) để chạy demo khử nhiễu.
+
+**Output yêu cầu:**
+
+Biểu đồ so sánh SNR khi có/không có các module.
+
+Hình ảnh sóng ECG trước và sau khi lọc trên dữ liệu mới/mức nhiễu mới.
+
+📅 QUY ĐỊNH CHUNG
+Code: Viết script mới trong thư mục scripts/, đặt tên là baseline_A.py và ablation_B.py để tránh đụng code chính.
+
+Commit: Khi push code, nhớ KHÔNG ADD folder data hay checkpoints.
+
+Deadline: Cố gắng xong code và có số liệu sơ bộ trước [Thứ 3, 25 tháng 11/14h Chiều] để có gì mình chỉnh sửa thêm và làm slide.
+
