@@ -44,7 +44,7 @@ cd ecg-denoise
 ```
 **2. Tải Dữ liệu:**
 
-Vào link Google Drive này: [CHÈN LINK DRIVE CỦA BẠN VÀO ĐÂY]
+Vào link Google Drive này: [LINK](https://drive.google.com/file/d/1AmlfymWhjkB8n__mKqd8GE-PkzRuUTXq/view?usp=sharing)
 
 Tải file data.zip và giải nén.
 
