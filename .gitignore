@@ -1,0 +1,14 @@
+data/
+.venv/
+checkpoints/
+__pycache__/
+*.pth
+*.zip
+
+# Bỏ qua file cấu hình IDE
+.vscode/
+.idea/
+
+# File hệ thống
+.DS_Store
+
