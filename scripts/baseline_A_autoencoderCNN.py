@@ -278,7 +278,7 @@ def main():
 
     # ---- Optimizer / loss ----
     optimizer = torch.optim.Adam(model.parameters())
-    loss_fn = PeakWeightedMSE()
+    loss_fn = nn.MSELoss()
 
     # AMP chỉ khi thật sự dùng CUDA
     use_cuda_amp = ("cuda" in args.device.lower()) and torch.cuda.is_available()
