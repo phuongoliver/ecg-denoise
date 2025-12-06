@@ -1,12 +1,14 @@
-import os, math, time, json, random, argparse
+import os
+import time
+import json
+import random
+import argparse
 import numpy as np
 from pathlib import Path
-from typing import List, Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
-from pathlib import Path
 from losses import PeakWeightedMSE
 
 
@@ -60,6 +62,8 @@ class DecoderBlock(nn.Module):
 
 
 # ---------- CNN-SWT ----------
+
+
 class CNNSWT(nn.Module):
     def __init__(
         self, channels: int, k: int = 8, dilations=(1, 2), use_bn: bool = False
@@ -87,7 +91,8 @@ class CNNSWT(nn.Module):
         self.register_buffer("alt_sign", alt)
 
         # Pointwise 1x1 để gom các nhánh -> channels
-        in_ch = channels * 2 * len(self.dilations)  # (approx + detail) cho mỗi mức
+        # (approx + detail) cho mỗi mức
+        in_ch = channels * 2 * len(self.dilations)
         self.proj = nn.Conv1d(in_ch, channels, kernel_size=1, bias=True)
         self.act = nn.ReLU(inplace=True)
         self.bn = nn.BatchNorm1d(channels) if use_bn else nn.Identity()
@@ -134,6 +139,8 @@ class CNNSWT(nn.Module):
 
 
 # ---------- Transformer ----------
+
+
 class Time2Vec(nn.Module):
     def __init__(self, k: int = 3):  # 3 sine + 1 linear
         super().__init__()
@@ -183,6 +190,8 @@ class TransformerBlock(nn.Module):
 
 
 # ---------- Full Model ----------
+
+
 class DenoiseCNN_SWT_Transformer(nn.Module):
     def __init__(
         self, in_ch=1, base_ch=16, nhead=4, ffn_mult=2, num_transformer_layers=2
@@ -223,7 +232,8 @@ class DenoiseCNN_SWT_Transformer(nn.Module):
         x3, skip3 = self.enc3(x2)  # (B,c3,L/8),  skip3: (B,c3,L/4)
 
         # -------- Pre-bottleneck + Bottleneck --------
-        b = self.pre_bottleneck(x3)  # ConvReLU+BN+Dropout(0.5), (B,c3,L/8)
+        # ConvReLU+BN+Dropout(0.5), (B,c3,L/8)
+        b = self.pre_bottleneck(x3)
         b = self.swt(b)  # (B,c3,L/8)
         b = self.transformer(b)  # (B,c3,L/8)
 
@@ -234,6 +244,91 @@ class DenoiseCNN_SWT_Transformer(nn.Module):
         y = self.dec1(y)  # (B,c1,L)
 
         noise_hat = self.out(y)  # (B,1,L)
+        return x - noise_hat
+
+
+class DenoiseCNN_NoSWT(nn.Module):
+    """Variant WITHOUT SWT - only uses Transformer in bottleneck"""
+
+    def __init__(
+        self, in_ch=1, base_ch=16, nhead=4, ffn_mult=2, num_transformer_layers=2
+    ):
+        super().__init__()
+        c1, c2, c3 = base_ch, base_ch * 2, base_ch * 4
+
+        self.enc1 = EncoderBlock(in_ch, c1, k=3)
+        self.enc2 = EncoderBlock(c1, c2, k=3)
+        self.enc3 = EncoderBlock(c2, c3, k=3, use_dropout=True, p=0.5)
+        self.pre_bottleneck = nn.Sequential(
+            ConvBNReLU(c3, c3, k=3, s=1, p=1), nn.Dropout(0.5)
+        )
+
+        # Only Transformer (no SWT)
+        self.transformer = nn.Sequential(
+            *[
+                TransformerBlock(d_model=c3, nhead=nhead, dim_feedforward=c3 * ffn_mult)
+                for _ in range(num_transformer_layers)
+            ]
+        )
+
+        self.dec4 = DecoderBlock(c3 + c3, c3, k=3)
+        self.dec3 = DecoderBlock(c3 + c2, c2, k=3)
+        self.dec2 = DecoderBlock(c2 + c1, c1, k=3)
+        self.dec1 = ConvBNReLU(c1, c1, k=3)
+        self.out = nn.Conv1d(c1, 1, kernel_size=1)
+
+    def forward(self, x):
+        x1, skip1 = self.enc1(x)
+        x2, skip2 = self.enc2(x1)
+        x3, skip3 = self.enc3(x2)
+
+        b = self.pre_bottleneck(x3)
+        b = self.transformer(b)  # Only Transformer
+
+        y = self.dec4(b, skip3)
+        y = self.dec3(y, skip2)
+        y = self.dec2(y, skip1)
+        y = self.dec1(y)
+        noise_hat = self.out(y)
+        return x - noise_hat
+
+
+class DenoiseCNN_NoTransformer(nn.Module):
+    """Variant WITHOUT Transformer - only uses SWT in bottleneck"""
+
+    def __init__(self, in_ch=1, base_ch=16):
+        super().__init__()
+        c1, c2, c3 = base_ch, base_ch * 2, base_ch * 4
+
+        self.enc1 = EncoderBlock(in_ch, c1, k=3)
+        self.enc2 = EncoderBlock(c1, c2, k=3)
+        self.enc3 = EncoderBlock(c2, c3, k=3, use_dropout=True, p=0.5)
+        self.pre_bottleneck = nn.Sequential(
+            ConvBNReLU(c3, c3, k=3, s=1, p=1), nn.Dropout(0.5)
+        )
+
+        # Only SWT (no Transformer)
+        self.swt = CNNSWT(c3, k=7, dilations=(1, 2), use_bn=False)
+
+        self.dec4 = DecoderBlock(c3 + c3, c3, k=3)
+        self.dec3 = DecoderBlock(c3 + c2, c2, k=3)
+        self.dec2 = DecoderBlock(c2 + c1, c1, k=3)
+        self.dec1 = ConvBNReLU(c1, c1, k=3)
+        self.out = nn.Conv1d(c1, 1, kernel_size=1)
+
+    def forward(self, x):
+        x1, skip1 = self.enc1(x)
+        x2, skip2 = self.enc2(x1)
+        x3, skip3 = self.enc3(x2)
+
+        b = self.pre_bottleneck(x3)
+        b = self.swt(b)  # Only SWT
+
+        y = self.dec4(b, skip3)
+        y = self.dec3(y, skip2)
+        y = self.dec2(y, skip1)
+        y = self.dec1(y)
+        noise_hat = self.out(y)
         return x - noise_hat
 
 
@@ -266,6 +361,8 @@ def snr_db(clean: torch.Tensor, est: torch.Tensor, eps: float = 1e-12) -> torch.
 # -----------------------
 # Dataset
 # -----------------------
+
+
 class NPZECGWindows(Dataset):
     """
     Expects an .npz with keys: noisy (N,L), clean (N,L).
@@ -300,7 +397,10 @@ def train_one_epoch(model, loader, optimizer, scaler, device, loss_fn, grad_clip
         y = y.to(device, non_blocking=True)
 
         optimizer.zero_grad(set_to_none=True)
-        with torch.cuda.amp.autocast(enabled=scaler is not None):
+        with torch.amp.autocast(
+            device_type="cuda" if scaler is not None else "cpu",
+            enabled=scaler is not None,
+        ):
             y_hat = model(x)  # denoised (B,1,L)
             loss = loss_fn(y_hat, y)
 
@@ -364,6 +464,8 @@ def evaluate(model, loader, device, loss_fn):
 # -----------------------
 # Main
 # -----------------------
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-dir", type=str, default="data/processed")
@@ -380,6 +482,14 @@ def main():
     ap.add_argument(
         "--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu"
     )
+    ap.add_argument(
+        "--model-variant",
+        type=str,
+        default="full",
+        choices=["full", "no-swt", "no-transformer"],
+        help="Model variant: full (default), no-swt, or no-transformer",
+    )
+
     args = ap.parse_args()
 
     set_seed(args.seed)
@@ -427,9 +537,19 @@ def main():
     dl_va = _make_loader(ds_va, False)
 
     # ---- Model ----
-    model = DenoiseCNN_SWT_Transformer(
-        in_ch=1, base_ch=16, nhead=4, ffn_mult=2, num_transformer_layers=2
-    ).to(args.device)
+    if args.model_variant == "no-swt":
+        model = DenoiseCNN_NoSWT(
+            in_ch=1, base_ch=16, nhead=4, ffn_mult=2, num_transformer_layers=2
+        ).to(args.device)
+        print("[INFO] Using model WITHOUT SWT")
+    elif args.model_variant == "no-transformer":
+        model = DenoiseCNN_NoTransformer(in_ch=1, base_ch=16).to(args.device)
+        print("[INFO] Using model WITHOUT Transformer")
+    else:
+        model = DenoiseCNN_SWT_Transformer(
+            in_ch=1, base_ch=16, nhead=4, ffn_mult=2, num_transformer_layers=2
+        ).to(args.device)
+        print("[INFO] Using FULL model (SWT + Transformer)")
 
     # ---- Print params ----
     try:
@@ -446,7 +566,10 @@ def main():
 
     # AMP chỉ khi thật sự dùng CUDA
     use_cuda_amp = ("cuda" in args.device.lower()) and torch.cuda.is_available()
-    scaler = torch.cuda.amp.GradScaler(enabled=use_cuda_amp)
+    if use_cuda_amp:
+        scaler = torch.amp.GradScaler("cuda")
+    else:
+        scaler = None
 
     best_val_snr = -1e9
     log = []
