@@ -7,11 +7,11 @@ class PeakWeightedMSE(nn.Module):
         self.eps = eps
 
     def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        # pred, target: (B,1,L) hoặc (B,L)
+        # pred, target: (B,1,L) or (B,L)
         if pred.dim() == 3: pred = pred.squeeze(1)  # (B,L)
         if target.dim() == 3: target = target.squeeze(1)
 
-        # median theo từng batch
+        # median per batch
         med = target.median(dim=1, keepdim=True).values  # (B,1)
         Cp = 1.0 + torch.abs(target - med)              # (B,L)
 

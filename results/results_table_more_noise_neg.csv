@@ -1,0 +1,3 @@
+Method,SNR_in (dB),SNR_out (dB),ΔSNR (dB),MSE
+Baseline filter,-2.50,-0.35,2.15,0.21
+DL denoiser,-2.50,13.12,15.62,0.02

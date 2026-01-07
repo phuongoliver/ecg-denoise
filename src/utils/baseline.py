@@ -10,7 +10,7 @@ def baseline_filter(x, fs=360.0, notch_freq=50.0):  # x: (L,) or (B,L)
         if notch_freq:
             b0, a0 = iirnotch(w0=notch_freq/(fs/2), Q=30)
             y = filtfilt(b0, a0, y)
-        # 3) low-pass 40 Hz (giữ hầu hết morphology ECG chẩn đoán)
+        # 3) low-pass 40 Hz (keep most diagnostic ECG morphology)
         b2, a2 = butter(2, 40.0/(fs/2), btype='low')
         y = filtfilt(b2, a2, y)
         return y.astype(np.float32)

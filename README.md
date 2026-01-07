@@ -1,7 +1,12 @@
 # Efficient CNN-SWT-Transformer for Fog-Based ECG Denoising
 
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-orange)
+![Device](https://img.shields.io/badge/Device-Edge%2FCloud-green)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
 ## 📌 Project Overview
-This project proposes a lightweight Deep Learning architecture designed to remove noise from Electrocardiogram (ECG) signals directly on Fog/Edge computing devices (e.g., Raspberry Pi). By combining CNN, Stationary Wavelet Transform (SWT), and Transformers, we achieve high-performance denoising with low latency, eliminating the need for heavy Cloud-based processing.
+This project proposes a **lightweight Deep Learning architecture** designed to remove noise from Electrocardiogram (ECG) signals directly on **Fog/Edge computing devices** (e.g., Raspberry Pi, Jetson Nano). By combining **Convolutional Neural Networks (CNN)**, **Stationary Wavelet Transform (SWT)**, and **Transformers**, we achieve high-performance denoising with low latency, eliminating the need for heavy Cloud-based processing.
 
 ## 1. The Problem
 Real-world ECG monitoring faces significant challenges:
@@ -10,7 +15,7 @@ Real-world ECG monitoring faces significant challenges:
 * **Cloud-AI Limitations:** While modern Deep Learning models offer excellent denoising, they are typically too heavy. Deploying them on the Cloud incurs high costs, significant latency, and data privacy concerns.
 
 ## 2. Our Solution
-We developed an "Ultra-Lightweight" AI model optimized for execution on Fog Computing devices (specifically tested on **Raspberry Pi 3**).
+We developed an **"Ultra-Lightweight"** AI model optimized for execution on Fog Computing devices.
 
 ### Architecture
 The model utilizes a hybrid approach:
@@ -19,101 +24,121 @@ The model utilizes a hybrid approach:
 3.  **Transformer:** Leveraging self-attention mechanisms to capture long-range dependencies in the signal.
 
 ## 3. Key Results
-Our model achieves a balance between high accuracy and computational efficiency suitable for real-time IoT applications.
+Our proposed method demonstrates superior performance compared to traditional and basic deep learning methods, validated through comprehensive ablation studies.
 
-| Metric | Result | Note |
-| :--- | :--- | :--- |
-| **Denoising Performance** | **+15.6 dB** | Improvement in SNR (Signal-to-Noise Ratio) compared to standard filters. |
-| **Model Size** | **0.15 Million** | Extremely low parameter count. |
-| **Inference Speed** | **~22 ms** | Running on Raspberry Pi 3 (Real-time capable). |
+### 🏆 Benchmark Comparison
+Comparison against baseline methods (Conducted by @TNAK2004):
+
+| Method | Input SNR (dB) | SNR Output (dB) ↑ | ΔSNR (Gain) ↑ | MSE ↓ | Inference (s) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Baseline Filter** | 5.00 | 0.51 | -4.49 | 0.17 | ~0.00 |
+| **Wavelet Transform** | 5.00 | 5.01 | +0.01 | 0.08 | 0.03 |
+| **Simple CNN (AE)** | 5.00 | 11.65 | +6.65 | 0.03 | 0.04 |
+| **Ours (SWT+Trans)** | 5.00 | **15.60** | **+10.60** | **0.02** | 0.02 |
+
+> *Note: Results evaluated on Test Set with SNR_in = 5dB.*
+
+### 🧩 Ablation Study
+Investigating the contribution of each module (Conducted by @PhucCodee):
+
+| Architecture Variant | Best SNR (dB) | Impact vs Full | Observation |
+| :--- | :---: | :---: | :--- |
+| **No-Transformer** (Ablation) | 15.77 | -3.92 dB | **Major Drop**. Transformer is critical for performance. |
+| **No-SWT** (Ablation) | 19.35 | -0.34 dB | Slight Drop. SWT helps with fine detail stability. |
+| **Full Model** (CNN-SWT-Trans) | **19.69** | - | Optimal performance. |
+
+> *Note: Transformer contributes significantly (+3.92dB) to the denoising capability, while SWT adds refinement (+0.34dB).*
 
 ---
 
-## 📄 HƯỚNG DẪN THỰC HIỆN MINI-PROJECT DATA MINING
-**Topic:** Efficient CNN-SWT-Transformer for Fog-Based ECG Denoising
+## 🚀 Getting Started
 
-Chào mọi người, để hoàn thiện bài Mini-project, mình đã setup xong khung sườn dự án. Dưới đây là hướng dẫn cài đặt và phân chia nhiệm vụ cụ thể cho A và B. Các bạn tự chọn A hoặc B nha.
+### Prerequisites
+* Python 3.8+
+* PyTorch
+* NumPy, SciPy
 
-### 🛠 PHẦN 1: CÀI ĐẶT MÔI TRƯỜNG (Làm đầu tiên)
-Do dữ liệu ECG khá nặng, chúng ta sẽ **không push data lên GitHub**. Quy trình setup như sau:
+### Installation
 
-**1. Clone Code:**
 ```bash
 git clone https://github.com/phuongoliver/ecg-denoise.git
 cd ecg-denoise
-```
-**2. Tải Dữ liệu:**
-
-Vào link Google Drive này: [LINK](https://drive.google.com/file/d/1AmlfymWhjkB8n__mKqd8GE-PkzRuUTXq/view?usp=sharing)
-
-Tải file data.zip và giải nén.
-
-**Quan trọng:** Copy thư mục data vừa giải nén vào thư mục gốc của dự án (ngang hàng với scripts, models).
-
-**3. Cài thư viện:**
-
-Bash
-
-# Tạo virtual environment
-```bash
 python -m venv .venv
-```
-# Windows:
-```bash
-.venv\Scripts\activate
-```
-# Mac/Linux:
-```bash
-source .venv/bin/activate
-```
-# Cài đặt dependencies
-```bash
+# Activate venv (Windows: .venv\Scripts\activate, Linux/Mac: source .venv/bin/activate)
 pip install -r requirements.txt
 ```
 
-**4. Test:** Chạy thử python scripts/00_EDA.py. Nếu hiện biểu đồ ECG là thành công.
+### Data Preparation
+This project uses the **MIT-BIH Arrhythmia Database** and **NSTDB** (Noise Stress Test Database).
+Since raw data is not included in the repo, you need to generate synthetic noisy data:
 
-### 👤 PHẦN 2: NHIỆM VỤ CỤ THỂ
+```bash
+python scripts/download_data.py  # (Optional if you have the data)
+python scripts/prepare_data.py --snr-db -5 0 5
+```
+This will create `train.npz`, `val.npz`, `test.npz` in `data/processed`.
 
-**👉 Nhiệm vụ cho A: Baseline Comparison (So sánh)**
-- Mục tiêu: "Compared with other methods" + "Discuss advantages"
+### Usage
 
-- Nội dung: Bạn cần chạy 2 phương pháp lọc nhiễu khác để so sánh với model của mình proposed.
+**1. Training**
+To train the main model:
+```bash
+python scripts/train.py --epochs 50 --batch-size 64 --device cuda
+```
 
-1. Phương pháp 1: Wavelet Transform (Truyền thống)
-- Sử dụng thư viện PyWavelets (đã có trong requirements).
-- Viết script dùng hàm pywt.threshold để lọc nhiễu trên tập test set giống như model chính đang dùng.
-Lưu ý: Tham khảo các phương pháp truyền thống thường hạn chế trong việc loại bỏ đa dạng các loại nhiễu.
+**2. Training Variants (Ablation Studies)**
+You can train different variants to verify the effectiveness of each module:
+```bash
+# Train without SWT (Transformer only)
+python scripts/train.py --model-variant no-swt
 
-2. Phương pháp 2: Simple CNN Autoencoder (Deep Learning cơ bản)
-- Dựng một model CNN 1D đơn giản (không có SWT, không có Transformer).
-- Train nhanh trên data hiện có (khoảng 5-10 epochs). Model của mình là train trên 10 epochs.
+# Train without Transformer (SWT only)
+python scripts/train.py --model-variant no-transformer
 
-**Output yêu cầu:**
-- Một bảng so sánh 3 cột: Metric (SNR, MSE, Parameters, Inferenced Time) | Wavelet | Simple CNN | Ours.
-- Nhận xét: Tại sao model của nhóm mình (kết hợp SWT + Transformer) lại tốt hơn CNN thường?
-- Mở rộng: Nếu có thời gian thì có thể chạy một model DL khác nặng nhưng có kết quả có thể tốt hơn.
+# Train Baseline Simple CNN (Autoencoder)
+python scripts/train.py --model-variant baseline-cnn
+```
 
-**👉 Nhiệm vụ cho bạn B: Ablation Study & Validation**
-- Mục tiêu: "Evaluate with relevant data"  + "Improvement direction"
+**3. Evaluation & ONNX Export**
+```bash
+# Export to ONNX for Edge deployment
+python scripts/export_onnx.py --ckpt checkpoints/best_model.pth --out denoiser.onnx
 
-- Nội dung: Chứng minh độ hiệu quả và tính bền vững của kiến trúc model.
+# Evaluate on Test Set
+python scripts/evaluate.py
+```
 
-1. Ablation Study (Nghiên cứu loại bỏ):
-- Thử bỏ module Transformer hoặc SWT ra khỏi kiến trúc code hiện tại.
-- Train lại và xem chỉ số SNR giảm bao nhiêu.
-Ý nghĩa: Chứng minh rằng các module này là cần thiết, không thể bỏ đi.
+---
 
-2. Robustness Test (Kiểm thử độ bền):
-- Sử dụng model chính (Ours), chạy test trên một mức nhiễu khác như -5dB (ví dụ: nhiễu cực đại hoặc nhiễu cực tiểu).
-- Hoặc/Và: Lấy 1 file ECG bất kỳ từ bộ dữ liệu khác (như QT Database trên PhysioNet) để chạy demo khử nhiễu.
+## 🤝 Project Structure
 
-**Output yêu cầu:**
-- Biểu đồ so sánh SNR khi có/không có các module.
-- Hình ảnh sóng ECG trước và sau khi lọc trên dữ liệu mới/mức nhiễu mới.
+```
+├── configs/             # Configuration files (Hyperparameters)
+├── scripts/             # Execution scripts (train, data gen, export)
+├── src/                 # Source code
+│   ├── models/          # Model architectures (Main, Variants, Baselines)
+│   ├── datasets/        # Dataset loading logic
+│   ├── training/        # Training & Evaluation loops
+│   └── utils/           # Metrics & Helpers
+├── tests/               # Unit tests
+├── notebooks/           # Jupyter notebooks for experiments/visualization
+└── results/             # Logs and Checkpoints
+```
 
-**📅 QUY ĐỊNH CHUNG**
-- Code: Viết script mới trong thư mục scripts/, đặt tên là baseline_A.py và ablation_B.py để tránh đụng code chính.
-- Commit: Khi push code, nhớ KHÔNG ADD folder data hay checkpoints.
-- Deadline: Cố gắng xong code và có số liệu sơ bộ trước [Thứ 3, 25 tháng 11/14h Chiều] để có gì mình chỉnh sửa thêm và làm slide.
+## 📜 Credits & References
+This project is based on research into efficient deep learning for biomedical signal processing.
+We extended the standard CS-TRANS methodologies by:
+- Optimizing layers for Edge deployment.
+- Introducing a weighted Peak-MSE loss for better QRS reconstruction.
+- Conducting comprehensive ablation studies.
 
+## ⚖️ Acknowledgements & License
+This project is an **independent re-implementation and extension** of the architecture proposed in the research:
+> *CS-TRANS: An efficient deep learning model for ECG denoising.* [DOI: 10.1016/j.bspc.2024.106441](https://doi.org/10.1016/j.bspc.2024.106441)
+
+If you use this code, please credit the original authors and this repository.
+
+**Contributors:**
+- **[Tran Mai Phuong (@phuongoliver)](https://github.com/phuongoliver)** – *Lead Researcher & Implementation:* Core architecture re-implementation, Edge optimization, and weighted Peak-MSE loss.
+- **[Trần Hoàng Phúc (@PhucCodee)](https://github.com/PhucCodee)** – *Baseline Comparison:* Implemented Wavelet Transform and Simple CNN Autoencoder baselines for performance benchmarking.
+- **[Khoi Tran Nguyen Anh (@TNAK2004)](https://github.com/TNAK2004)** – *Ablation & Validation:* Conducted ablation studies (Effect of SWT/Transformer) and robustness testing on diverse noise levels.

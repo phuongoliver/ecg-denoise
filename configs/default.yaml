@@ -1,0 +1,23 @@
+# Basic training configuration
+experiment_name: "ecg_denoise_baseline"
+device: "cuda"  # or "cpu"
+
+training:
+  epochs: 50
+  batch_size: 64
+  learning_rate: 1e-3
+  weight_decay: 1e-4
+  grad_clip: 1.0
+  save_dir: "results/checkpoints"
+
+data:
+  train_path: "data/processed/train.npz"
+  val_path: "data/processed/val.npz"
+  test_path: "data/processed/test.npz"
+  noise_types: ["bw", "em", "ma"]
+  snr_levels: [-5, 0, 5]
+
+model:
+  name: "ECG_Transformer_SWT"
+  dropout: 0.1
+  # Add other model specific params here
