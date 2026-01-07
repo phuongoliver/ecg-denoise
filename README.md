@@ -3,7 +3,7 @@
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-orange)
 ![Device](https://img.shields.io/badge/Device-Edge%2FCloud-green)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
+![License](http://img.shields.io/badge/license-Apache%20License%202.0-blue)
 
 ## 📌 Project Overview
 This project proposes a **lightweight Deep Learning architecture** designed to remove noise from Electrocardiogram (ECG) signals directly on **Fog/Edge computing devices** (e.g., Raspberry Pi, Jetson Nano). By combining **Convolutional Neural Networks (CNN)**, **Stationary Wavelet Transform (SWT)**, and **Transformers**, we achieve high-performance denoising with low latency, eliminating the need for heavy Cloud-based processing.
