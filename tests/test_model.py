@@ -28,7 +28,7 @@ class TestDenoiseModel(unittest.TestCase):
 
     def test_loss_function(self):
         """Test if PeakWeightedMSE calculates valid loss."""
-        loss_fn = PeakWeightedMSE(alpha=10.0)
+        loss_fn = PeakWeightedMSE()
         target = self.dummy_input.clone()
         # Add small noise to create differences
         prediction = target + 0.1 * torch.randn_like(target)
