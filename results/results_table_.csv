@@ -1,0 +1,4 @@
+Method,SNR_in (dB),SNR_out (dB),ΔSNR (dB),MSE,Inference Time
+Baseline filter,5.00,0.51,-4.49,0.17,0.00
+CNN denoiser,5.00,11.65,6.65,0.03,0.04
+WT denoiser,5.00,5.01,0.01,0.08,0.03
