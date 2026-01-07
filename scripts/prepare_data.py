@@ -28,7 +28,7 @@ from typing import List, Tuple, Dict
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJ_ROOT  = SCRIPT_DIR.parent
 DATA_DIR   = PROJ_ROOT / "data"
-OUT_DIR    = DATA_DIR / "processed"
+OUT_DIR    = DATA_DIR / "processed_more_noise_neg"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 MITDB_PATH = DATA_DIR / "mitdb/physionet.org/files/mitdb/1.0.0"
@@ -226,7 +226,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--win-sec", type=float, default=2.0, help="window length (s)")
     parser.add_argument("--stride-sec", type=float, default=1.0, help="stride (s)")
-    parser.add_argument("--snr-db", type=float, nargs="+", default=[0.0, 5.0, 10.0], help="SNR_in levels (dB)")
+    parser.add_argument("--snr-db", type=float, nargs="+", default=[-5.0, 0.0, 5.0], help="SNR_in levels (dB)")
     parser.add_argument("--lead-idx", type=int, default=0, help="ECG lead index to use")
     parser.add_argument("--max-win-per-rec", type=int, default=1000, help="limit windows per record for speed (None for all)")
     parser.add_argument("--seed", type=int, default=123, help="rng seed")

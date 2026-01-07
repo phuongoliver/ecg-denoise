@@ -2,12 +2,17 @@
 import numpy as np, pandas as pd, torch, math
 from pathlib import Path
 from sklearn.metrics import mean_squared_error
-from model_train import DenoiseCNN_SWT_Transformer
-from baseline_filter import baseline_filter
+import sys
+# Add project root to sys.path
+ROOT_DIR = Path(__file__).resolve().parents[1]
+sys.path.append(str(ROOT_DIR))
+
+from src.models.architecture import DenoiseCNN_SWT_Transformer
+from src.utils.baseline import baseline_filter
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJ_ROOT  = SCRIPT_DIR.parent
-DATA_DIR   = PROJ_ROOT / "data" / "processed"
+DATA_DIR   = PROJ_ROOT / "data" / "processed_more_noise_neg"
 CHECKPOINT_DIR = PROJ_ROOT / "checkpoints"
 RESULT_DIR = PROJ_ROOT / "results"
 
@@ -90,7 +95,7 @@ def main(device="cpu", batch_size=32, limit=None):
         ["DL denoiser",     *[f"{v:.2f}" for v in dl_m]],
     ], columns=["Method", "SNR_in (dB)", "SNR_out (dB)", "ΔSNR (dB)", "MSE"])
     print(df)
-    df.to_csv(RESULT_DIR / "results_table1.csv", index=False)
+    df.to_csv(RESULT_DIR / "results_table_more_noise_neg.csv", index=False)
 
 if __name__ == "__main__":
     main()
